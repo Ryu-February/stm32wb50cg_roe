@@ -42,7 +42,6 @@ void rgb_init(void)
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 	HAL_GPIO_WritePin(GPIOA, RGB_CH_BLUE | RGB_CH_RED | RGB_CH_GREEN, GPIO_PIN_SET);
-
 }
 
 void rgb_set_pwm(uint8_t r, uint8_t g, uint8_t b)

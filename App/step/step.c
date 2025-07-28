@@ -11,6 +11,7 @@
 extern TIM_HandleTypeDef htim2;
 
 volatile bool idx_change = false;
+volatile StepOperation step_op;
 
 /*                            Motor(15BY25-119)                         */
 /*                           Motor driver(A3916)                        */
