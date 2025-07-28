@@ -11,11 +11,14 @@
 
 #include "def.h"
 
-
+#define IR_THRESHOLD 	30
 
 
 void ir_init(void);
 
+
+uint16_t ir_read_adc(void);
+uint8_t ir_is_black(void);
 
 
 

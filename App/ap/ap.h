@@ -14,6 +14,7 @@
 #include "pwm.h"
 #include "rgb.h"
 #include "ir.h"
+#include "uart.h"
 
 
 void ap_init(void);
