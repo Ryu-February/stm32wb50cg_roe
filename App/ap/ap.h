@@ -10,11 +10,17 @@
 
 
 #include "utils.h"
+
+#include "ir.h"
 #include "led.h"
 #include "pwm.h"
 #include "rgb.h"
-#include "ir.h"
+#include "i2c.h"
 #include "uart.h"
+#include "step.h"
+#include "flash.h"
+#include "color.h"
+
 
 
 void ap_init(void);

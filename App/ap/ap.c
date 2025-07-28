@@ -15,11 +15,15 @@
 
 void ap_init(void)
 {
+	i2c_init();
+	uart_init();
+
 	ir_init();
 	led_init();
 	pwm_init();
 	rgb_init();
-	uart_init();
+	color_init();
+	step_init_all();
 
 
 	led_on(_DEF_CH1);//white led on
