@@ -11,6 +11,9 @@
 
 #include "utils.h"
 #include "led.h"
+#include "pwm.h"
+#include "rgb.h"
+#include "ir.h"
 
 
 void ap_init(void);

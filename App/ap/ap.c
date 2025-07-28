@@ -8,6 +8,7 @@
 
 #include "ap.h"
 
+extern ADC_HandleTypeDef hadc1;
 
 
 
@@ -15,6 +16,11 @@
 void ap_init(void)
 {
 	led_init();
+	pwm_init();
+	rgb_init();
+
+
+	led_on(_DEF_CH1);//white led on
 }
 
 

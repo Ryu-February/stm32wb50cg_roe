@@ -20,10 +20,12 @@
 
 
 
-#define _DEF_CH1	0
-#define _DEF_CH2	1
-#define _DEF_CH3	2
-#define _DEF_CH4	3
+#define _DEF_CH1		0
+#define _DEF_CH2		1
+#define _DEF_CH3		2
+#define _DEF_CH4		3
+
+#define LED_MAX_CH		1
 
 
 void delay(uint32_t ms);
