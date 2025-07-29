@@ -23,27 +23,9 @@ led_table_t led_table[LED_MAX_CH] =
 };
 
 
-bool led_init(void)
+void led_init(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-
-	GPIO_InitStruct.Pin = GPIO_PIN_1;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-	for(int i = 0; i < LED_MAX_CH; i++)
-	{
-		GPIO_InitStruct.Pin = led_table[i].pin;
-		HAL_GPIO_Init(led_table[i].port, &GPIO_InitStruct);
-
-		led_off(i);
-	}
-
-	return true;
+	led_on(_DEF_CH1);	//white led on(TR Base)
 }
 
 void led_on(uint8_t ch)

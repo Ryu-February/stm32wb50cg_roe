@@ -123,7 +123,7 @@ StepMotor name = 				\
 	.brake     = step_brake		\
 };
 
-void step_init_all(void);
+void step_motor_init(void);
 void roe_operate(uint8_t m_pin, uint8_t speed, uint8_t m_dir);
 void ms_operate(uint8_t m_pin, uint8_t speed, uint8_t m_dir);
 

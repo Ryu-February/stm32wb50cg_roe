@@ -23,24 +23,13 @@ void ap_init(void)
 	pwm_init();
 	rgb_init();
 	color_init();
-	step_init_all();
-
-
-	led_on(_DEF_CH1);//white led on
+	step_motor_init();
 }
 
 
 void ap_main(void)
 {
-	uint32_t prev_time = 0;
-
-
 	while(1)
 	{
-//		if (millis() - prev_time >= 500)
-//		{
-//			prev_time = millis();
-//			led_toggle(_DEF_CH1);
-//		}
 	}
 }

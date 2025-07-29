@@ -29,19 +29,7 @@ const rgb_led_t led_map[COLOR_COUNT] =
 
 void rgb_init(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-
-
-	/*Configure GPIO pins : PA4 PA5 PA6 */
-	GPIO_InitStruct.Pin = RGB_CH_BLUE|RGB_CH_RED|RGB_CH_GREEN;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-	HAL_GPIO_WritePin(GPIOA, RGB_CH_BLUE | RGB_CH_RED | RGB_CH_GREEN, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOA, RGB_CH_BLUE | RGB_CH_RED | RGB_CH_GREEN, GPIO_PIN_SET);//RGB LED OFF(PULL_UP)
 }
 
 void rgb_set_pwm(uint8_t r, uint8_t g, uint8_t b)
