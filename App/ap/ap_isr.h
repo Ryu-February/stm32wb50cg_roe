@@ -13,6 +13,8 @@
 
 
 
+
+void ap_exti0_callback(void);
 void ap_tim2_callback(void);
 void ap_tim16_callback(void);
 void ap_tim17_callback(void);

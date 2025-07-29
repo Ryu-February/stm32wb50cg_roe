@@ -153,6 +153,21 @@ color_t classify_color(uint8_t left_right, uint16_t r, uint16_t g, uint16_t b, u
 	return best_match;
 }
 
+uint8_t classify_color_side(uint8_t color_side)
+{
+	uint8_t addr = color_side;
+
+	bh1745_color_data_t color_rgbc;
+	color_t detected = COLOR_BLACK;
+
+	color_rgbc 	= bh1745_read_rgbc(addr);
+
+	detected =
+			classify_color(addr, color_rgbc.red, color_rgbc.green, color_rgbc.blue, color_rgbc.clear);
+
+	return (uint8_t) detected;
+}
+
 const char* color_to_string(color_t color)
 {
     static const char* color_names[] =

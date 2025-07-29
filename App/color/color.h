@@ -86,6 +86,8 @@ bh1745_color_data_t bh1745_read_rgbc(uint8_t dev_addr);
 void save_color_reference(uint8_t sensor_side, color_t color, uint16_t r, uint16_t g, uint16_t b);
 rgb_ratio_t get_rgb_ratio(uint16_t r, uint16_t g, uint16_t b);
 color_t classify_color(uint8_t left_right, uint16_t r, uint16_t g, uint16_t b, uint16_t c);
+uint8_t classify_color_side(uint8_t color_side);
+
 const char* color_to_string(color_t color);
 void load_color_reference_table(void);
 void debug_print_color_reference_table(void);
