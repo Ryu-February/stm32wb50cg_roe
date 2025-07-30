@@ -10,11 +10,15 @@
 
 
 volatile uint8_t detected_color = COLOR_BLACK;
-extern volatile bool pb0_pressed;
+volatile bool color_calibration = false;
 extern volatile bool check_color;
-extern volatile bool color_calibration;
-extern volatile uint32_t timer17_ms;
-extern volatile uint32_t pb0_pressed_ms;
+
+static bool init_printed = false;
+static uint8_t color_seq = 0;
+
+static void ap_task_color_calibration(void);
+static void ap_task_color_detection(void);
+
 
 void ap_init(void)
 {
@@ -28,64 +32,96 @@ void ap_init(void)
 	color_init();
 	step_motor_init();
 	load_color_reference_table();
+	debug_print_color_reference_table();
 }
 
 
 void ap_main(void)
 {
-//	uint32_t prev_time = 0;
-
-
 	while(1)
 	{
-//		if(millis() - prev_time > 500)
-//		{
-//			uint8_t adc_val = ir_read_adc();
-//			uart_printf("ir_val: %d\r\n", adc_val);
-//		}
-		uart_printf("pb0_pressed_ms: %d\r\n", pb0_pressed_ms);
-
-//		if(check_color == true)
-//		{
-//			uint8_t left_color 	= classify_color_side(BH1745_ADDR_LEFT);
-//			uint8_t right_color = classify_color_side(BH1745_ADDR_RIGHT);
-//
-//			if(left_color == right_color)
-//			{
-//				detected_color = left_color;
-//			}
-//			uart_printf("[left_color ]: %s\r\n", color_to_string(left_color));
-//			uart_printf("[right_color]: %s\r\n", color_to_string(right_color));
-//
-//			check_color = false;
-//		}
-
-		if(color_calibration && check_color)
+		if(!color_calibration && input_is_long_pressed(INPUT_MODE))
 		{
-			static uint8_t color_seq = 0;
+			color_calibration = true;
+			color_seq = 0;
+			init_printed = false;
+			uart_printf("[INFO] Entering color calibration mode...\r\n");
+		}
 
-			uart_printf("-------------COLOR SETTING-------------\r\n");
-			uart_printf("color set: [%s]\r\n", color_to_string(color_seq));
-
-
-			bh1745_color_data_t left  = bh1745_read_rgbc(BH1745_ADDR_LEFT);
-			bh1745_color_data_t right = bh1745_read_rgbc(BH1745_ADDR_RIGHT);
-
-			uart_printf("[LEFT]  R:%u G:%u B:%u C:%u\r\n",
-					left.red, left.green, left.blue, left.clear);
-
-			uart_printf("[RIGHT] R:%u G:%u B:%u C:%u\r\n",
-					right.red, right.green, right.blue, right.clear);
-
-			//save_color에서 RWX permission warning 뜸
-			save_color_reference(BH1745_ADDR_LEFT, color_seq, left.red, left.green, left.blue);
-			save_color_reference(BH1745_ADDR_RIGHT, color_seq, right.red, right.green, right.blue);
-
-			uart_printf("--------------------------------\r\n");
-			if(color_seq++ > COLOR_GRAY)
-			{
-				color_calibration = false;
-			}
+		if (color_calibration)
+		{
+			ap_task_color_calibration();
+		}
+		else
+		{
+			ap_task_color_detection();
 		}
 	}
+}
+
+
+
+static void ap_task_color_calibration(void)
+{
+	if(!check_color) return;
+
+	if (!init_printed)
+	{
+		uart_printf("-------------COLOR SETTING-------------\r\n");
+		init_printed = true;
+	}
+
+	if (input_is_short_pressed(INPUT_MODE))
+	{
+		uart_printf("color set: [%s]\r\n", color_to_string(color_seq));
+
+		bh1745_color_data_t left  = bh1745_read_rgbc(BH1745_ADDR_LEFT);
+		bh1745_color_data_t right = bh1745_read_rgbc(BH1745_ADDR_RIGHT);
+
+		uart_printf("[LEFT]  R:%u G:%u B:%u C:%u\r\n",
+					left.red, left.green, left.blue, left.clear);
+
+		uart_printf("[RIGHT] R:%u G:%u B:%u C:%u\r\n",
+					right.red, right.green, right.blue, right.clear);
+
+		save_color_reference(BH1745_ADDR_LEFT,  color_seq, left.red, left.green, left.blue);
+		save_color_reference(BH1745_ADDR_RIGHT, color_seq, right.red, right.green, right.blue);
+
+		uart_printf("--------------------------------\r\n");
+
+		if (++color_seq > COLOR_GRAY)
+		{
+			color_calibration = false;
+			init_printed = false;
+			color_seq = 0;
+			uart_printf("-------color set finished-------\r\n");
+			uart_printf("--------------------------------\r\n");
+			load_color_reference_table();
+			debug_print_color_reference_table();
+		}
+	}
+}
+
+
+// -------------------- 일반 색상 인식 루틴 --------------------
+static void ap_task_color_detection(void)
+{
+	if (!check_color) return;
+
+	uint8_t left  = classify_color_side(BH1745_ADDR_LEFT);
+	uint8_t right = classify_color_side(BH1745_ADDR_RIGHT);
+
+	if (left == right)
+	{
+		detected_color = left;
+		uart_printf("cur_detected color: %s\r\n", color_to_string(left));
+	}
+	else
+	{
+		detected_color = COLOR_BLACK;
+		uart_printf("The colors on both sides do not match!!\r\n");
+		uart_printf("[LEFT]: %s | [RIGHT]: %s\r\n", color_to_string(left), color_to_string(right));
+	}
+
+	check_color = false;
 }

@@ -20,6 +20,7 @@
 #include "step.h"
 #include "flash.h"
 #include "color.h"
+#include "input.h"
 
 
 

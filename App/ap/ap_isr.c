@@ -9,12 +9,10 @@
 #include "ap_isr.h"
 #include "rgb.h"
 #include "color.h"
+#include "input.h"
 
 volatile uint32_t timer17_ms;
-volatile uint32_t pb0_pressed_ms;
-volatile bool pb0_pressed = false;
-volatile bool check_color = false;
-volatile bool color_calibration = false;
+volatile bool check_color;
 
 extern volatile uint8_t detected_color;
 
@@ -31,13 +29,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 void ap_exti0_callback(void)
 {
-	pb0_pressed ^= true;
+	bool level = (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0) == GPIO_PIN_RESET);  // Pull-up 기준
+	input_exti_triggered(INPUT_MODE, level);
 
-	if(pb0_pressed == true)
-	{
+	if(level)
 		check_color = true;
-
-	}
 }
 
 
@@ -55,11 +51,7 @@ void ap_tim17_callback(void)
 {
 	timer17_ms++;
 
-	if(!pb0_pressed)
-		return;
+	input_update();
 
-	if(pb0_pressed_ms++ > 3000)
-	{
-		color_calibration = true;
-	}
+
 }

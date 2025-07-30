@@ -223,8 +223,8 @@ void debug_print_color_reference_table(void)
                     i, color_to_string(c), r.r_ratio, r.g_ratio, r.b_ratio);
     }
     uart_printf("=== BRIGHTNESS OFFSET TABLE ===\r\n");
-    uart_printf("offset_black: %d | offset_white: %d\r\n", offset_black, offset_white);
-	uart_printf("offset_aver: %d\r\n", offset_average);
+//    uart_printf("offset_black: %d | offset_white: %d\r\n", offset_black, offset_white);
+//	uart_printf("offset_aver: %d\r\n", offset_average);
 }
 
 uint32_t calculate_brightness(uint16_t r, uint16_t g, uint16_t b)
