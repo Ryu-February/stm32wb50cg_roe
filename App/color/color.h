@@ -41,16 +41,19 @@ typedef struct
 
 
 typedef struct {
-    float r_ratio;
-    float g_ratio;
-    float b_ratio;
-} rgb_ratio_t;
+    uint16_t red_raw;
+    uint16_t green_raw;
+    uint16_t blue_raw;
+} rgb_raw_t;
 
-typedef struct {
-    rgb_ratio_t ratio;
+typedef struct /*__attribute__((packed, aligned(8)))*/{
+	rgb_raw_t raw;
     color_t color;
-    uint64_t offset;//flash 메모리에 저장할 때 8바이트 단위로 맞춰야 해서 uint64_t로 구조체 총합 24바이트로 맞춤
+    uint8_t  _pad[1];    	// ✅ 여기까지가 정확히 8바이트(패딩용)
+    uint64_t offset;		//flash 메모리에 저장할 때 8바이트 단위로 맞춰야 해서 uint64_t로 구조체 총합 16바이트로 맞춤
 } reference_entry_t;
+
+//_Static_assert(sizeof(reference_entry_t) == 16, "reference_entry_t must be 16 bytes");
 
 typedef enum
 {
@@ -84,7 +87,7 @@ bh1745_color_data_t bh1745_read_rgbc(uint8_t dev_addr);
 bh1745_color_data_t bh1745_read_rgbc(uint8_t dev_addr);
 
 void save_color_reference(uint8_t sensor_side, color_t color, uint16_t r, uint16_t g, uint16_t b);
-rgb_ratio_t get_rgb_ratio(uint16_t r, uint16_t g, uint16_t b);
+//rgb_ratio_t get_rgb_ratio(uint16_t r, uint16_t g, uint16_t b);
 color_t classify_color(uint8_t left_right, uint16_t r, uint16_t g, uint16_t b, uint16_t c);
 uint8_t classify_color_side(uint8_t color_side);
 

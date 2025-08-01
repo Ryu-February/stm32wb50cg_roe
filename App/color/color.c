@@ -75,10 +75,10 @@ bh1745_color_data_t bh1745_read_rgbc(uint8_t dev_addr)
 
 void save_color_reference(uint8_t sensor_side, color_t color, uint16_t r, uint16_t g, uint16_t b)
 {
-    rgb_ratio_t ratio	= get_rgb_ratio(r, g, b);
+	rgb_raw_t	raw		= {.red_raw = r, .green_raw = g, .blue_raw = b};
     uint64_t 	offset	= calculate_brightness(r, g, b);
 
-    reference_entry_t entry = { .ratio = ratio, .color = color, .offset = offset };
+    reference_entry_t entry = { .raw = raw, .color = color, .offset = offset };
 
     if (sensor_side == BH1745_ADDR_LEFT)
     {
@@ -93,55 +93,31 @@ void save_color_reference(uint8_t sensor_side, color_t color, uint16_t r, uint16
     flash_write_color_reference(sensor_side, color, entry);
 }
 
-rgb_ratio_t get_rgb_ratio(uint16_t r, uint16_t g, uint16_t b)
-{
-    float total = (float)r + g + b;
-    rgb_ratio_t result = {0};
-
-    if (total > 0.0f)
-    {
-        result.r_ratio = r / total;
-        result.g_ratio = g / total;
-        result.b_ratio = b / total;
-    }
-
-//    uart_printf("[pr]: %1f [pg]: %1f [pb]: %1f\r\n", result.r_ratio, result.g_ratio, result.b_ratio);
-
-    return result;
-}
 
 color_t classify_color(uint8_t left_right, uint16_t r, uint16_t g, uint16_t b, uint16_t c)
 {
-	const float w_r = 1.2f;  // R 가중치
-	const float w_g = 1.0f;  // G 가중치
-	const float w_b = 1.0f;  // B 가중치
-
-	rgb_ratio_t input = get_rgb_ratio(r, g, b);
-
 	float min_dist = 1e9;
 	color_t best_match = COLOR_GRAY;
 
     const reference_entry_t* table;
-    int table_size;
+    int table_size = COLOR_COUNT;
 
     if (left_right == BH1745_ADDR_LEFT)  // LEFT
     {
         table = color_reference_tbl_left;
-        table_size = sizeof(color_reference_tbl_left) / sizeof(reference_entry_t);
     }
     else // RIGHT
     {
         table = color_reference_tbl_right;
-        table_size = sizeof(color_reference_tbl_right) / sizeof(reference_entry_t);
     }
 
     for (int i = 0; i < table_size; i++)
     {
-        float dr = input.r_ratio - table[i].ratio.r_ratio;
-        float dg = input.g_ratio - table[i].ratio.g_ratio;
-        float db = input.b_ratio - table[i].ratio.b_ratio;
+    	float dr = (float)r - table[i].raw.red_raw;
+		float dg = (float)g - table[i].raw.green_raw;
+		float db = (float)b - table[i].raw.blue_raw;
 
-        float dist = w_r * dr * dr + w_g * dg * dg + w_b * db * db;
+        float dist = dr * dr + dg * dg + db * db;
 
         if (dist < min_dist)
         {
@@ -206,21 +182,19 @@ void debug_print_color_reference_table(void)
     uart_printf("=== LEFT COLOR REFERENCE TABLE ===\r\n");
     for (int i = 0; i < COLOR_COUNT; i++)
     {
-        rgb_ratio_t r = color_reference_tbl_left[i].ratio;
-        color_t c = color_reference_tbl_left[i].color;
-
-        uart_printf("[%d | %s] [R]: %1.3f, [G]: %1.3f, [B]: %1.3f\r\n",
-                    i, color_to_string(c), r.r_ratio, r.g_ratio, r.b_ratio);
+        reference_entry_t e = color_reference_tbl_left[i];
+        uart_printf("[%2d | %-10s] R: %4d, G: %4d, B: %4d, OFFSET: %8llu\r\n",
+                    i, color_to_string(e.color),
+                    e.raw.red_raw, e.raw.green_raw, e.raw.blue_raw, e.offset);
     }
 
     uart_printf("=== RIGHT COLOR REFERENCE TABLE ===\r\n");
     for (int i = 0; i < COLOR_COUNT; i++)
     {
-        rgb_ratio_t r = color_reference_tbl_right[i].ratio;
-        color_t c = color_reference_tbl_right[i].color;
-
-        uart_printf("[%d | %s] [R]: %1.3f, [G]: %1.3f, [B]: %1.3f\r\n",
-                    i, color_to_string(c), r.r_ratio, r.g_ratio, r.b_ratio);
+        reference_entry_t e = color_reference_tbl_right[i];
+        uart_printf("[%2d | %-10s] R: %4d, G: %4d, B: %4d, OFFSET: %8llu\r\n",
+                    i, color_to_string(e.color),
+                    e.raw.red_raw, e.raw.green_raw, e.raw.blue_raw, e.offset);
     }
     uart_printf("=== BRIGHTNESS OFFSET TABLE ===\r\n");
 //    uart_printf("offset_black: %d | offset_white: %d\r\n", offset_black, offset_white);

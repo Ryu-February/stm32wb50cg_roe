@@ -69,6 +69,8 @@ static void ap_task_color_calibration(void)
 	{
 		uart_printf("-------------COLOR SETTING-------------\r\n");
 		init_printed = true;
+		flash_erase_color_table(BH1745_ADDR_LEFT);
+		flash_erase_color_table(BH1745_ADDR_RIGHT);
 	}
 
 	if (input_is_short_pressed(INPUT_MODE))

@@ -52,6 +52,4 @@ void ap_tim17_callback(void)
 	timer17_ms++;
 
 	input_update();
-
-
 }
