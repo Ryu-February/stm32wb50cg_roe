@@ -183,7 +183,7 @@ void debug_print_color_reference_table(void)
     for (int i = 0; i < COLOR_COUNT; i++)
     {
         reference_entry_t e = color_reference_tbl_left[i];
-        uart_printf("[%2d | %-10s] R: %4d, G: %4d, B: %4d, OFFSET: %8llu\r\n",
+        uart_printf("[%2d | %-11s] R: %4d, G: %4d, B: %4d, OFFSET: %8llu\r\n",
                     i, color_to_string(e.color),
                     e.raw.red_raw, e.raw.green_raw, e.raw.blue_raw, e.offset);
     }
@@ -192,7 +192,7 @@ void debug_print_color_reference_table(void)
     for (int i = 0; i < COLOR_COUNT; i++)
     {
         reference_entry_t e = color_reference_tbl_right[i];
-        uart_printf("[%2d | %-10s] R: %4d, G: %4d, B: %4d, OFFSET: %8llu\r\n",
+        uart_printf("[%2d | %-11s] R: %4d, G: %4d, B: %4d, OFFSET: %8llu\r\n",
                     i, color_to_string(e.color),
                     e.raw.red_raw, e.raw.green_raw, e.raw.blue_raw, e.offset);
     }

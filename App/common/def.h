@@ -30,7 +30,7 @@
 #define LED_MAX_CH		1
 
 
-void delay(uint32_t ms);
+void delay_ms(uint32_t ms);
 uint32_t millis(void);
 
 

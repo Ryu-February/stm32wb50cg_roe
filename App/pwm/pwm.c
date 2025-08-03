@@ -13,6 +13,7 @@
 
 bool pwm_init(void)
 {
+	HAL_TIM_Base_Start_IT(&htim2);
 	HAL_TIM_Base_Start_IT(&htim16);
 	HAL_TIM_Base_Start_IT(&htim17);
 

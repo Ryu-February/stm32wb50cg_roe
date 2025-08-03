@@ -14,14 +14,29 @@
 
 #define LEFT        0
 #define RIGHT       1
-//#define FORWARD     0
-//#define REVERSE     1
-//#define TURN_LEFT   2
-//#define TURN_RIGHT  3
 
 #define SAFE_MAX_RPM    1200
 #define MAX_SPEED       100
 #define MIN_SPEED       0
+
+#define L_IN1_PORT GPIOA
+#define L_IN1_PIN  GPIO_PIN_0
+#define L_IN2_PORT GPIOA
+#define L_IN2_PIN  GPIO_PIN_1
+#define L_IN3_PORT GPIOA
+#define L_IN3_PIN  GPIO_PIN_2
+#define L_IN4_PORT GPIOA
+#define L_IN4_PIN  GPIO_PIN_3
+
+// 오른쪽 모터 핀
+#define R_IN1_PORT GPIOB
+#define R_IN1_PIN  GPIO_PIN_4
+#define R_IN2_PORT GPIOB
+#define R_IN2_PIN  GPIO_PIN_5
+#define R_IN3_PORT GPIOB
+#define R_IN3_PIN  GPIO_PIN_6
+#define R_IN4_PORT GPIOB
+#define R_IN4_PIN  GPIO_PIN_7
 
 #define MICRO_MAX_PWM   255
 
@@ -109,7 +124,7 @@ StepMotor name = 				\
 	.in2_pin  = in2, 			\
 								\
 	.in3_port = in3p, 			\
-	.in3_pin  = in3, 			\
+	.in3_pin  = in3,  			\
 								\
 	.in4_port = in4p,			\
 	.in4_pin  = in4, 			\
@@ -140,5 +155,7 @@ uint16_t mode_to_step_count(color_mode_t mode);
 uint16_t mode_to_left_period(color_mode_t mode);
 uint16_t mode_to_right_period(color_mode_t mode);
 
+void step_drive_lightweight(void);
+void apply_test(uint8_t side);
 
 #endif /* STEP_STEP_H_ */

@@ -94,33 +94,107 @@ const uint8_t step_table[32] = {			//sin(degree) -> pwm
 #endif
 
 
-
+static uint8_t step_idx_left = 0;
+static uint8_t step_idx_right = 0;
+static uint32_t prev_us_left = 0;
+static uint32_t prev_us_right = 0;
 
 static void apply_step(StepMotor *m)
 {
 #if (_USE_STEP_MODE == _STEP_MODE_MICRO)
-  uint8_t now = __HAL_TIM_GET_COUNTER(&htim2);
-  now = (now % 255);
+//	uint8_t now = __HAL_TIM_GET_COUNTER(&htim2) & 0xFF;//(0~255로 제한)
+//	now = (now % 255);
+	uint8_t now = TIM2->CNT & 0xFF;
 
-  m->vA = step_table[m->step_idx];
-  m->vB = step_table[(m->step_idx + (STEP_TABLE_SIZE >> 2)) & STEP_MASK]; //(STEP_MASK >> 2) == 8 == 90°(difference sin with cos)
-  //sin파와 cos파의 위상 차가 90도가 나니까 +8을 한 거임 +8은 32를 360도로 치환했을 때 90도를 의미함
+	m->vA = step_table[m->step_idx];
+	m->vB = step_table[(m->step_idx + (STEP_TABLE_SIZE >> 2)) & STEP_MASK]; //(STEP_MASK >> 2) == 8 == 90°(difference sin with cos)
+	//sin파와 cos파의 위상 차가 90도가 나니까 +8을 한 거임 +8은 32를 360도로 치환했을 때 90도를 의미함
 
-  if (now < m->vA)				HAL_GPIO_WritePin(m->in1_port, m->in1_pin, GPIO_PIN_SET);
-  else							HAL_GPIO_WritePin(m->in1_port, m->in1_pin, GPIO_PIN_RESET);
-  if (now < (255 - m->vA)) 	  	HAL_GPIO_WritePin(m->in2_port, m->in2_pin, GPIO_PIN_SET);
-  else 							HAL_GPIO_WritePin(m->in2_port, m->in2_pin, GPIO_PIN_RESET);
+	if (now < m->vA)        	m->in1_port->BSRR = m->in1_pin;
+	else                 		m->in1_port->BRR  = m->in1_pin;
 
-  if (now < m->vB)				HAL_GPIO_WritePin(m->in3_port, m->in3_pin, GPIO_PIN_SET);
-  else							HAL_GPIO_WritePin(m->in3_port, m->in3_pin, GPIO_PIN_RESET);
-  if (now < (255 - m->vB)) 	  	HAL_GPIO_WritePin(m->in4_port, m->in4_pin, GPIO_PIN_SET);
-  else 							HAL_GPIO_WritePin(m->in4_port, m->in4_pin, GPIO_PIN_RESET);
+	if (now < (255 - m->vA)) 	m->in2_port->BSRR = m->in2_pin;
+	else                  		m->in2_port->BRR  = m->in2_pin;
+
+	if (now < m->vB)         	m->in3_port->BSRR = m->in3_pin;
+	else                  		m->in3_port->BRR  = m->in3_pin;
+
+	if (now < (255 - m->vB)) 	m->in4_port->BSRR = m->in4_pin;
+	else                 		m->in4_port->BRR  = m->in4_pin;
 #else
   HAL_GPIO_WritePin(m->in1_port, m->in1_pin, step_table[m->step_idx][0]);
   HAL_GPIO_WritePin(m->in2_port, m->in2_pin, step_table[m->step_idx][1]);
   HAL_GPIO_WritePin(m->in3_port, m->in3_pin, step_table[m->step_idx][2]);
   HAL_GPIO_WritePin(m->in4_port, m->in4_pin, step_table[m->step_idx][3]);
 #endif
+}
+
+void apply_test(uint8_t side)
+{
+	if(side == LEFT)
+	{
+		uint32_t now = TIM2->CNT;
+		uint8_t pwm = now & 0xFF;
+		uint8_t vA	= step_table[step_idx_left];
+		uint8_t vB	= step_table[(step_idx_left + (STEP_TABLE_SIZE >> 2)) & STEP_MASK];
+
+
+		if (pwm < vA)       L_IN1_PORT->BSRR = L_IN1_PIN;
+		else                L_IN1_PORT->BRR  = L_IN1_PIN;
+
+		// A- (IN2)
+		if (pwm < (255 - vA)) L_IN2_PORT->BSRR = L_IN2_PIN;
+		else                  L_IN2_PORT->BRR  = L_IN2_PIN;
+
+		// B+ (IN3)
+		if (pwm < vB)       L_IN3_PORT->BSRR = L_IN3_PIN;
+		else                L_IN3_PORT->BRR  = L_IN3_PIN;
+
+		// B- (IN4)
+		if (pwm < (255 - vB)) L_IN4_PORT->BSRR = L_IN4_PIN;
+		else                  L_IN4_PORT->BRR  = L_IN4_PIN;
+
+		if(now - prev_us_left < 1500)
+		{
+			return;
+
+		}
+		prev_us_left = now;
+		step_idx_left = (step_idx_left - 1) & STEP_MASK;
+
+	}
+	else if(side == RIGHT)
+	{
+		uint32_t now = TIM2->CNT;
+		uint8_t pwm = now & 0xFF;
+		uint8_t vA	= step_table[step_idx_right];
+		uint8_t vB	= step_table[(step_idx_right + (STEP_TABLE_SIZE >> 2)) & STEP_MASK];
+
+		if (pwm < vA)       R_IN1_PORT->BSRR = R_IN1_PIN;
+		else                R_IN1_PORT->BRR  = R_IN1_PIN;
+
+		// A- (IN2)
+		if (pwm < (255 - vA)) R_IN2_PORT->BSRR = R_IN2_PIN;
+		else                  R_IN2_PORT->BRR  = R_IN2_PIN;
+
+		// B+ (IN3)
+		if (pwm < vB)       R_IN3_PORT->BSRR = R_IN3_PIN;
+		else                R_IN3_PORT->BRR  = R_IN3_PIN;
+
+		// B- (IN4)
+		if (pwm < (255 - vB)) R_IN4_PORT->BSRR = R_IN4_PIN;
+		else                  R_IN4_PORT->BRR  = R_IN4_PIN;
+
+		if(now - prev_us_right < 1500)
+		{
+			return;
+
+		}
+		prev_us_right = now;
+		step_idx_right = (step_idx_right + 1) & STEP_MASK;
+	}
+
+
 }
 
 void step_init(StepMotor *m)
@@ -139,6 +213,8 @@ void step_motor_init(void)
 {
 	step_motor_left.init(&step_motor_left);
 	step_motor_right.init(&step_motor_right);
+
+	step_drive(STOP);
 }
 
 void step_forward(StepMotor *m)
@@ -148,7 +224,8 @@ void step_forward(StepMotor *m)
   m->step_idx = (m->step_idx + 1) & STEP_MASK;
 #else
   apply_step(m);
-  uint64_t now = __HAL_TIM_GET_COUNTER(&htim2);
+//  uint64_t now = __HAL_TIM_GET_COUNTER(&htim2);
+  uint64_t now = TIM2->CNT;
 //  uint64_t now = timer16_10us;
   idx_change = false;
   if(now - m->prev_time_us < m->period_us)
@@ -169,7 +246,8 @@ void step_reverse(StepMotor *m)
   m->step_idx = (m->step_idx - 1) & STEP_MASK;
 #else
   apply_step(m);
-  uint64_t now = __HAL_TIM_GET_COUNTER(&htim2);
+//  uint64_t now = __HAL_TIM_GET_COUNTER(&htim2);
+  uint64_t now = TIM2->CNT;
 //  uint64_t now = timer16_10us;
   idx_change = false;
   if(now - m->prev_time_us < m->period_us)
@@ -277,6 +355,23 @@ void step_drive(StepOperation op)
 		step_motor_left.brake(&step_motor_left);
 		step_motor_right.brake(&step_motor_right);
 	}
+}
+
+void step_drive_lightweight(void)
+{
+	uint64_t now = __HAL_TIM_GET_COUNTER(&htim2);
+
+	apply_step(&step_motor_left);
+	apply_step(&step_motor_right);
+
+	if(now - step_motor_left.prev_time_us < 1500)
+	{
+		return;
+  	}
+	step_motor_left.prev_time_us = now;
+
+	step_motor_left.step_idx = (step_motor_left.step_idx - 1) & STEP_MASK;
+	step_motor_right.step_idx = (step_motor_right.step_idx + 1) & STEP_MASK;
 }
 
 void step_stop(void)
