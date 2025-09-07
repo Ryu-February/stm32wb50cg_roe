@@ -64,33 +64,34 @@ void ap_main(void)
 //		uart_printf("cheeze\r\n");
 //		uart_printf("kimchi\r\n");
 
-		if(rgb_update)
-		{
-			rgb_set_color(detected_color);
-			rgb_update = false;
-		}
+//		if(rgb_update)
+//		{
+//			rgb_set_color(detected_color);
+//			rgb_update = false;
+//		}
 
-		if(step_update)
-		{
-			switch (detected_color)
-			{
-				case COLOR_RED :
-		//			step_drive(FORWARD);
-					apply_test(LEFT);
-					apply_test(RIGHT);
-					break;
-				case COLOR_ORANGE :
-					step_drive(REVERSE);
-					break;
-				case COLOR_YELLOW :
-					step_drive(TURN_LEFT);
-					break;
-				case COLOR_GREEN :
-					step_drive(TURN_RIGHT);
-					break;
-			}
-			step_update = false;
-		}
+//		if(step_update)
+//		{
+//			switch (detected_color)
+
+//			{
+//				case COLOR_RED :
+//					step_drive(FORWARD);
+////					apply_test(LEFT);
+////					apply_test(RIGHT);
+//					break;
+//				case COLOR_ORANGE :
+//					step_drive(REVERSE);
+//					break;
+//				case COLOR_YELLOW :
+//					step_drive(TURN_LEFT);
+//					break;
+//				case COLOR_GREEN :
+//					step_drive(TURN_RIGHT);
+//					break;
+//			}
+//			step_update = false;
+//		}
 	}
 }
 

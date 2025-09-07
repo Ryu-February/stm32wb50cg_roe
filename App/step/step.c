@@ -12,6 +12,7 @@ extern TIM_HandleTypeDef htim2;
 
 volatile bool idx_change = false;
 volatile StepOperation step_op;
+volatile uint32_t target_steps = 0;
 
 /*                            Motor(15BY25-119)                         */
 /*                           Motor driver(A3916)                        */
@@ -232,10 +233,14 @@ void step_forward(StepMotor *m)
   {
 	  return;
   }
-  m->total_step++;
+  m->executed_steps++;
   idx_change = true;
   m->prev_time_us = now;
+#if (_USE_STEP_NUM == _STEP_119)
   m->step_idx = (m->step_idx - 1) & STEP_MASK;
+#else
+  m->step_idx = (m->step_idx + 1) & STEP_MASK;
+#endif
 #endif
 }
 
@@ -254,10 +259,14 @@ void step_reverse(StepMotor *m)
   {
 	return;
   }
-  m->total_step++;
+  m->executed_steps++;
   idx_change = true;
   m->prev_time_us = now;
+#if (_USE_STEP_NUM == _STEP_119)
   m->step_idx = (m->step_idx + 1) & STEP_MASK;
+#else
+  m->step_idx = (m->step_idx - 1) & STEP_MASK;
+#endif
 #endif
 }
 
@@ -318,14 +327,14 @@ void step_idx_init(void)
 
 uint32_t get_current_steps(void)
 {
-	uint32_t total_step = (step_motor_left.total_step + step_motor_right.total_step) / 2;
-	return total_step;
+	uint32_t current_steps = (step_motor_left.executed_steps + step_motor_right.executed_steps) / 2;
+	return current_steps;
 }
 
-void total_step_init(void)
+void executed_step_init(void)
 {
-	step_motor_left.total_step = 0;
-	step_motor_right.total_step = 0;
+	step_motor_left.executed_steps = 0;
+	step_motor_right.executed_steps = 0;
 }
 
 void step_drive(StepOperation op)

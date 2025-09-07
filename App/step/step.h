@@ -57,6 +57,13 @@
   #define STEP_PER_REV  80
 #endif
 
+#define _STEP_119		0
+#define _STEP_728		1
+#define _STEP_729		2
+
+
+#define _USE_STEP_NUM	_STEP_729
+
 typedef struct StepMotor
 {
   GPIO_TypeDef* in1_port; uint16_t in1_pin;
@@ -69,7 +76,7 @@ typedef struct StepMotor
   uint32_t period_us;
   uint64_t prev_time_us;
 
-  uint32_t total_step;
+  uint32_t executed_steps;
   uint8_t vA, vB;      // for micro step
 
   void (*init)(struct StepMotor*);
@@ -143,7 +150,7 @@ void roe_operate(uint8_t m_pin, uint8_t speed, uint8_t m_dir);
 void ms_operate(uint8_t m_pin, uint8_t speed, uint8_t m_dir);
 
 uint32_t get_current_steps(void);
-void total_step_init(void);
+void executed_step_init(void);
 void step_drive(StepOperation op);
 
 void step_idx_init(void);

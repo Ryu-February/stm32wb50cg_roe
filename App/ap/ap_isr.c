@@ -19,6 +19,7 @@ volatile bool rgb_update;
 volatile bool step_update;
 
 extern volatile uint8_t detected_color;
+extern volatile uint32_t target_steps;
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -72,29 +73,40 @@ void ap_tim16_callback(void)
 //		mode_timing_started = false;
 //		mode_update = false;
 //	}
-	rgb_update = true;
 
-	if(detected_color != COLOR_BLACK)
+	rgb_set_color(detected_color);
+
+	if(detected_color == COLOR_BLACK)
 	{
-		step_update = true;
+		return;
 	}
-//	switch (detected_color)
-//	{
-//		case COLOR_RED :
-////			step_drive(FORWARD);
-//			apply_test(LEFT);
-//			apply_test(RIGHT);
-//			break;
-//		case COLOR_ORANGE :
-//			step_drive(REVERSE);
-//			break;
-//		case COLOR_YELLOW :
-//			step_drive(TURN_LEFT);
-//			break;
-//		case COLOR_GREEN :
-//			step_drive(TURN_RIGHT);
-//			break;
-//	}
+
+	switch (detected_color)
+	{
+		case COLOR_RED :
+			step_drive(REVERSE);
+			target_steps = 1500;
+			break;
+		case COLOR_GREEN :
+			step_drive(FORWARD);
+			target_steps = 1500;
+			break;
+		case COLOR_BLUE :
+			step_drive(TURN_LEFT);
+			target_steps = 1050;
+			break;
+		case COLOR_YELLOW :
+			step_drive(TURN_RIGHT);
+			target_steps = 1050;
+			break;
+	}
+
+	if(get_current_steps() >= target_steps)
+	{
+		detected_color = COLOR_BLACK;
+		executed_step_init();
+		step_drive(STOP);
+	}
 }
 
 void ap_tim17_callback(void)
